@@ -14,10 +14,14 @@ async def startup():
 
 @app.route('/')
 async def homepage(request):
-    if conn:
-        return JSONResponse({'hello': (await conn.get('key')).decode('utf-8')})
-    else:
-        return JSONResponse({'error': 'error connecting to redis'})
+    try:
+        raw_value = await conn.get('key')
+        value = raw_value.decode('utf-8')
+        response = {'hello': value}
+    except:
+        response = {'error': 'error while fetching from redis'}
+    return JSONResponse(response)
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8000, lifespan='on')
